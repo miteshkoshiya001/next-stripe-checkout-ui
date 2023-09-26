@@ -215,7 +215,7 @@ const PaymentUi = () => {
     const handleSubscribe = () => {
         setIsLoading(true);
 
-        
+
         setTimeout(() => {
             setIsLoading(false);
         }, 3000);
@@ -254,28 +254,31 @@ const PaymentUi = () => {
         <>
             <div className='flex flex-col lg:flex-row items-center justify-center w-full min-h-screen'>
                 <div className='bg-black w-full lg:w-1/2 lg:min-h-screen flex flex-col items-center lg:items-end  gap-10 text-white relative 2xl:pt-16 '>
-                    <header className={`flex fixed  items-start justify-between w-full pt-3 px-5 lg:hidden ${(isModal && scrollY < 250) ? "bg-white" : "bg-black"} `}>
-                        <div className='flex items-center gap-3  '>
-                            <AiOutlineArrowLeft className='w-10 text-gray-400' />
+                    <header className={`flex fixed  items-center justify-between w-full pt-3 px-5 lg:hidden ${(isModal && scrollY < 250) ? "bg-white" : "bg-black"} `}>
+                        <div className='flex items-center gap-3  justify-center '>
+                            <AiOutlineArrowLeft className='w-10 text-gray-400 ' />
                             {(isModal && scrollY < 250) ? <Image src="/images/olevl.png"
                                 width="100"
                                 height="80"
                                 alt='olevl'
+                                className='w-[50px] h-[30px]'
                             /> :
-                                <Image src="/images/olevl (1).png"
+                                <Image src="/images/olevl_1.png"
                                     width="100"
                                     height="80"
                                     alt='olevl'
+                                    className='w-[50px]  xs:w-[100px]  '
                                 />}
                         </div>
                         <button className='flex items-center justify-center gap-1 py-3 rounded-md text-gray-400 ' onClick={() => setIsModal(!isModal)}>
                             <span className='underline decoration-dotted ' >{scrollY > 250 ? "$125.00" : isModal ? "Close" : "Details"}</span>
-                            {isModal ? <AiOutlineUp /> : <AiOutlineDown />
-                            }
+
+                            <AiOutlineDown className={`transform ${isModal ? "rotate-180" : "rotate-0"} transition-transform duration-300 ease-in-out`} />
+
                         </button>
                     </header>
                     {
-                        // (isModal && scrollY < 250) && 
+                        (isModal && scrollY < 250) && 
                         <div className={` ${(isModal && scrollY < 250) ? "slide-in" : "slide-out  -translate-y-[156%] "} absolute top-14 flex  justify-center gap-0 w-full flex-col bg-white px-7 `}>
                             <div className='flex items-center justify-between gap-10 py-5 border-b border-gray-600'>
                                 <div className='flex flex-col items-start'>
@@ -311,7 +314,7 @@ const PaymentUi = () => {
                     <div className='flex flex-col items-center lg:items-start px-5 pb-10 lg:pb-0 lg:p-10 xl:p-16 xl:pt-16 gap-10 pt-16 '>
                         <div className='lg:flex items-center gap-3 hidden '>
                             <AiOutlineArrowLeft className='w-10 text-gray-400' />
-                            <Image src="/images/olevl (1).png"
+                            <Image src="/images/olevl_1.png"
                                 width="100"
                                 height="80"
                                 alt='olevl'
@@ -364,8 +367,9 @@ const PaymentUi = () => {
 
                         <button className='flex items-center justify-center gap-1 bg-gray-900 px-4 py-3 rounded-md lg:hidden ' onClick={() => setIsModal(!isModal)}>
                             <span > View details</span>
-                            {isDetails ? <AiOutlineUp /> : <AiOutlineDown />
-                            }
+                            {/* {isDetails ? <AiOutlineUp /> : <AiOutlineDown />
+                            } */}
+                            <AiOutlineDown className={`transform ${isModal ? "rotate-180" : "rotate-0"} transition-transform duration-300 ease-in-out`} />
                         </button>
                     </div>
                 </div>
@@ -392,11 +396,32 @@ const PaymentUi = () => {
                                 <div className='flex items-start flex-col w-full'>
                                     <label htmlFor="AddCard" className=' text-gray-400 text-base font-medium leading-8 cursor-pointer '>Card information</label>
                                     <div className='flex items-start flex-col  border border-gray-400 rounded-lg w-full S '>
-                                        <div className='w-full flex items-center border-b border-gray-400 '>
-                                            <input type="text" name="card" id="AddCard" className='w-full bg-transparent py-1 pl-2 outline-none ' placeholder='1234 1234 1234 1234 ' />
+                                        <div className='w-full flex items-center  border-b border-gray-400 '>
+                                            <input type="text" name="card" id="AddCard" className='w-[80%] bg-transparent py-1 pl-2 outline-none ' placeholder='1234 1234 1234 1234 ' />
                                             <div className='flex items-center pr-2 gap-2'>
-                                                <BsCreditCardFill />
-                                                <BsCreditCard />
+                                                {/* <BsCreditCardFill />
+                                                <BsCreditCard /> */}
+                                                <Image src="/images/visa.png"
+                                                    width="20"
+                                                    height="15"
+                                                    alt='olevl'
+                                                />
+                                                <Image src="/images/mastercard.jpg"
+                                                    width="20"
+                                                    height="15"
+                                                    alt='olevl'
+                                                    className='h-[15px]'
+                                                />
+                                                <Image src="/images/bluecard.png"
+                                                    width="20"
+                                                    height="15"
+                                                    alt='olevl'
+                                                />
+                                                <Image src="/images/atm.jpg"
+                                                    width="20"
+                                                    height="15"
+                                                    alt='olevl'
+                                                />
                                             </div>
                                         </div>
                                         <div className='w-full border flex items-center rounded-b-lg '>
@@ -426,9 +451,7 @@ const PaymentUi = () => {
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
                                         />
-                                        {
-                                            isOpen ? <AiOutlineUp className='w-4 h-4 cursor-pointer' onClick={() => toggleDropdown()} /> : <AiOutlineDown className='w-4 h-4 cursor-pointer' onClick={() => toggleDropdown()} />
-                                        }
+                                        <AiOutlineDown className={`transform ${isOpen ? "rotate-180" : "rotate-0"} transition-transform duration-300 ease-in-out w-4 h-4 cursor-pointer `} />
                                     </div>
                                     {isOpen && (
                                         <div className="absolute z-10 mt-0 w-full bg-white border border-gray-300 rounded-b-md shadow-lg h-[200px] overflow-auto ">
