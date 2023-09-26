@@ -1,7 +1,7 @@
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { AiFillApple, AiOutlineArrowLeft, AiOutlineDown, AiOutlineUp } from 'react-icons/ai';
-import { BsCreditCard, BsCreditCardFill } from 'react-icons/bs';
+import { BsChevronDown, BsCreditCardFill } from 'react-icons/bs';
 
 const countries = [
     'Afghanistan',
@@ -207,10 +207,26 @@ const countries = [
 const PaymentUi = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const [isDetails, setIsDetails] = useState(false);
     const [isModal, setIsModal] = useState(false);
     const [scrollY, setScrollY] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
+    const dropdownRef = useRef(null);
+    
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        }
+
+        // Add event listener when the component mounts
+        document.addEventListener('click', handleClickOutside);
+
+        // Clean up the event listener when the component unmounts
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, []);
 
     const handleSubscribe = () => {
         setIsLoading(true);
@@ -254,14 +270,14 @@ const PaymentUi = () => {
         <>
             <div className='flex flex-col lg:flex-row items-center justify-center w-full min-h-screen'>
                 <div className='bg-black w-full lg:w-1/2 lg:min-h-screen flex flex-col items-center lg:items-end  gap-10 text-white relative 2xl:pt-16 '>
-                    <header className={`flex fixed  items-center justify-between w-full pt-3 px-5 lg:hidden ${(isModal && scrollY < 250) ? "bg-white" : "bg-black"} `}>
+                    <header className={`flex fixed  items-center justify-between w-full pt-3 px-5 z-50 lg:hidden ${(isModal && scrollY < 250) ? "bg-white " : "bg-black "}  `}>
                         <div className='flex items-center gap-3  justify-center '>
                             <AiOutlineArrowLeft className='w-10 text-gray-400 ' />
                             {(isModal && scrollY < 250) ? <Image src="/images/olevl.png"
                                 width="100"
                                 height="80"
                                 alt='olevl'
-                                className='w-[50px] h-[30px]'
+                                className='w-[50px] xs:w-[100px]'
                             /> :
                                 <Image src="/images/olevl_1.png"
                                     width="100"
@@ -270,15 +286,17 @@ const PaymentUi = () => {
                                     className='w-[50px]  xs:w-[100px]  '
                                 />}
                         </div>
-                        <button className='flex items-center justify-center gap-1 py-3 rounded-md text-gray-400 ' onClick={() => setIsModal(!isModal)}>
-                            <span className='underline decoration-dotted ' >{scrollY > 250 ? "$125.00" : isModal ? "Close" : "Details"}</span>
+                        <button className='flex items-center justify-center gap-1 py-3 rounded-md text-gray-400  ' onClick={() => setIsModal(!isModal)}>
+                            <span className='border-b border-dashed inline-block leading-5 border-gray-400  ' >
+                                {scrollY > 250 ? "$125.00" : isModal ? "Close" : "Details"}
+                            </span>
 
-                            <AiOutlineDown className={`transform ${isModal ? "rotate-180" : "rotate-0"} transition-transform duration-300 ease-in-out`} />
+                            <BsChevronDown className={`transform ${isModal ? "rotate-180" : "rotate-0"} transition-transform duration-300 ease-in-out`} />
 
                         </button>
                     </header>
                     {
-                        (isModal && scrollY < 250) && 
+                        (isModal && scrollY < 250) &&
                         <div className={` ${(isModal && scrollY < 250) ? "slide-in" : "slide-out  -translate-y-[156%] "} absolute top-14 flex  justify-center gap-0 w-full flex-col bg-white px-7 `}>
                             <div className='flex items-center justify-between gap-10 py-5 border-b border-gray-600'>
                                 <div className='flex flex-col items-start'>
@@ -329,7 +347,7 @@ const PaymentUi = () => {
                                     <span className='text-gray-400 text-lg font-medium '>today</span>
                                 </div>
                             </div>
-                            <span className='text-lg text-gray-400 font-semibold text-center '>Then $125.00 per month starting on October 15, 2023</span>
+                            <span className='text-lg text-gray-400 font-semibold text-center lg:text-start '>Then $125.00 per month starting on October 15, 2023</span>
                         </div>
 
                         <div className={`lg:flex justify-center gap-2 flex-col  hidden `}>
@@ -369,7 +387,7 @@ const PaymentUi = () => {
                             <span > View details</span>
                             {/* {isDetails ? <AiOutlineUp /> : <AiOutlineDown />
                             } */}
-                            <AiOutlineDown className={`transform ${isModal ? "rotate-180" : "rotate-0"} transition-transform duration-300 ease-in-out`} />
+                            <BsChevronDown className={`transform ${isModal ? "rotate-180" : "rotate-0"} transition-transform duration-300 ease-in-out`} />
                         </button>
                     </div>
                 </div>
@@ -399,8 +417,6 @@ const PaymentUi = () => {
                                         <div className='w-full flex items-center  border-b border-gray-400 '>
                                             <input type="text" name="card" id="AddCard" className='w-[80%] bg-transparent py-1 pl-2 outline-none ' placeholder='1234 1234 1234 1234 ' />
                                             <div className='flex items-center pr-2 gap-2'>
-                                                {/* <BsCreditCardFill />
-                                                <BsCreditCard /> */}
                                                 <Image src="/images/visa.png"
                                                     width="20"
                                                     height="15"
@@ -417,17 +433,72 @@ const PaymentUi = () => {
                                                     height="15"
                                                     alt='olevl'
                                                 />
-                                                <Image src="/images/atm.jpg"
+                                                {/* <Image src="/images/atm.jpg"
                                                     width="20"
                                                     height="15"
                                                     alt='olevl'
-                                                />
+                                                    className='swiper-slide'
+                                                /> */}
+
+                                                {/* <div className='max-w-[30px] max-h-[20px]  '>
+                                                    <Swiper
+                                                        slidesPerView={1}
+                                                        spaceBetween={1}
+                                                        loop={true} 
+                                                        autoplay={{
+                                                            delay: 3000, 
+                                                            disableOnInteraction: false, 
+                                                        }}
+                                                        pagination={false} // Remove pagination
+                                                        navigation={true} // Remove navigation
+                                                        className='max-w-[40px] max-h-[15px] '
+                                                    >
+                                                        <SwiperSlide className=''>
+                                                            <Image
+                                                                src="/images/visa.png"
+                                                                width="20"
+                                                                height="15"
+                                                                alt="olevl"
+                                                            />
+                                                        </SwiperSlide>
+                                                        <SwiperSlide>
+                                                            <Image
+                                                                src="/images/mastercard.jpg"
+                                                                width="20"
+                                                                height="15"
+                                                                alt="olevl"
+                                                                className="h-[15px]"
+                                                            />
+                                                        </SwiperSlide>
+                                                        <SwiperSlide>
+                                                            <Image
+                                                                src="/images/bluecard.png"
+                                                                width="20"
+                                                                height="15"
+                                                                alt="olevl"
+                                                            />
+                                                        </SwiperSlide>
+                                                        <SwiperSlide>
+                                                    <Image
+                                                        src="/images/atm.jpg"
+                                                        width="20"
+                                                        height="15"
+                                                        alt="olevl"
+                                                        className="swiper-slide w-[20px] "
+                                                    />
+                                                </SwiperSlide>
+                                                    </Swiper>
+                                                </div> */}
+
                                             </div>
+
+
+
                                         </div>
                                         <div className='w-full border flex items-center rounded-b-lg '>
-                                            <input type="number" id="dateInput" name="dateInput" pattern="\d{2}/\d{2}" placeholder="MM / YY" className=' border-r border-gray-400  bg-transparent py-1 pl-2 w-1/2  outline-none ' />
+                                            <input type="text" id="dateInput" name="dateInput" pattern="\d{2}/\d{2}" placeholder="MM / YY" className=' border-r border-gray-400  bg-transparent py-1 pl-2 w-1/2  outline-none ' />
                                             <div className='flex items-center justify-between px-5 w-1/2'>
-                                                <input type="number" name="cvc" id="" placeholder="CVC" className=' border-none  bg-transparent py-1 w-1/2  outline-none ' />
+                                                <input type="text" name="cvc" id="" placeholder="CVC" className=' border-none  bg-transparent py-1 w-1/2  outline-none ' />
                                                 <BsCreditCardFill />
                                             </div>
                                         </div>
@@ -440,7 +511,7 @@ const PaymentUi = () => {
                                 </div>
 
 
-                                <div className="relative inline-block text-left w-full">
+                                <div className="relative inline-block text-left w-full " ref={dropdownRef} >
                                     <span className=' text-gray-400 text-base font-medium leading-8 '>Billing address</span>
                                     <div className='flex items-center bg-transparent border border-gray-300 rounded-t-lg shadow-sm px-4 w-full '>
                                         <input
@@ -451,7 +522,7 @@ const PaymentUi = () => {
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
                                         />
-                                        <AiOutlineDown className={`transform ${isOpen ? "rotate-180" : "rotate-0"} transition-transform duration-300 ease-in-out w-4 h-4 cursor-pointer `} />
+                                        <BsChevronDown className={`transform ${isOpen ? "rotate-180" : "rotate-0"} transition-transform duration-300 ease-in-out w-4 h-4 cursor-pointer `} onClick={() => toggleDropdown()} />
                                     </div>
                                     {isOpen && (
                                         <div className="absolute z-10 mt-0 w-full bg-white border border-gray-300 rounded-b-md shadow-lg h-[200px] overflow-auto ">
@@ -470,7 +541,7 @@ const PaymentUi = () => {
                                     )}
                                     <input type="text" name="address" id="address" placeholder='Address' className="  py-2 text-sm font-medium text-gray-700 bg-transparent  w-full border-b border-l border-r border-gray-300  shadow-sm px-4 rounded-b-lg outline-none " />
 
-                                    <div className='underline decoration-dotted text-gray-400 text-base font-semibold '>Enter address manually</div>
+                                    <div className=' text-gray-400 text-base font-semibold border-b border-dashed inline-block leading-5 border-gray-400 '>Enter address manually</div>
                                 </div>
 
                                 <div className='border border-gray-300 rounded-lg shadow-sm px-4 w-full flex items-start gap-5 py-2 mt-3 '>
@@ -500,8 +571,8 @@ const PaymentUi = () => {
                             </div>
                         </form>
                     </div>
-                </div>
-            </div>
+                </div >
+            </div >
         </>
     )
 }

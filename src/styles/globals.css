@@ -44,11 +44,13 @@ body {
     transform: translateY(0);
     opacity: 1;
   }
+
   100% {
     transform: translateY(-100%);
     opacity: 0;
   }
 }
+
 .slide-out {
   animation: slideOut 0.3s ease-in;
 }
@@ -68,8 +70,15 @@ body {
 }
 
 @keyframes spin {
-  0% { transform: translate(-50%, -50%) rotate(0deg); }
-  100% { transform: translate(-50%, -50%) rotate(360deg); }
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }
 
-
+.text-container {
+  transition: all 0.7s ease; /* This sets the transition duration and easing function */
+}
