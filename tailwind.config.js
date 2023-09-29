@@ -22,6 +22,10 @@ module.exports = {
         '2xl': '1536px',
         '3xl': '1620px',
         'laptop': "1444px",
+        'custom': {
+          min: '900px',
+          max: '920px',
+        },
       },
     },
   },

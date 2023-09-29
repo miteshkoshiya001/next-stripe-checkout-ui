@@ -27,8 +27,6 @@ const PaymentUi = () => {
     const [isLoading, setIsLoading] = useState(false);
     const dropdownRef = useRef(null);
 
-
-
     const settings = {
         dots: false,
         infinite: true,
@@ -36,14 +34,16 @@ const PaymentUi = () => {
         slidesToScroll: 1,
         autoplay: true,
         speed: 2000,
-        autoplaySpeed: 1000,
+        autoplaySpeed: 2000,
         arrows: false,
+        fade: true,
     };
 
     useEffect(() => {
         function handleClickOutside(event) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setIsOpen(false);
+                setIsModal(false);
             }
         }
 
@@ -55,9 +55,8 @@ const PaymentUi = () => {
             document.removeEventListener('click', handleClickOutside);
         };
     }, []);
-
     const handleInputChange = (e) => {
-        e.preventDefault();
+        // e.preventDefault();
         const { name, value, type, checked } = e.target;
 
         setFormErrors({
@@ -117,9 +116,11 @@ const PaymentUi = () => {
             if (formattedValue.length > 2) {
                 formattedValue = formattedValue.substring(0, 2) + '/' + formattedValue.substring(2);
             }
-
+            const [enteredMonthValue, enteredYear] = formattedValue.split('/');
+            console.log(enteredMonthValue, "enteredMonth", enteredYear, "enteredYear");
             // Check if the input has a valid MM/YY format (without a leading zero in month)
             if (/^(0[1-9]|1[0-2])\/\d{2}$/.test(formattedValue)) {
+                console.log("Invalid MM/YY format");
                 /* setFormErrors({
                     ...formErrors,
                     cardExpiration: '', // Clear the error if the input is valid
@@ -127,7 +128,7 @@ const PaymentUi = () => {
                 const [enteredMonth, enteredYear] = formattedValue.split('/');
                 const currentMonth = new Date().getMonth() + 1; // Current month (1-12)
                 const currentYear = new Date().getFullYear() % 100; // Last two digits of current year
-
+                console.log(enteredMonth, "enteredMonth");
                 // Convert enteredYear to a number
                 const numericEnteredYear = parseInt(enteredYear, 10);
 
@@ -138,9 +139,11 @@ const PaymentUi = () => {
                 ) {
                     setFormErrors({
                         ...formErrors,
-                        cardExpiration: 'Expiration date is in the past',
+                        cardExpiration: 'Your card has expired.',
                     });
                 } else {
+                    console.log("enter else");
+                    console.log("enter error");
                     setFormErrors({
                         ...formErrors,
                         cardExpiration: '', // Clear the error if the input is valid
@@ -151,16 +154,22 @@ const PaymentUi = () => {
                     ...formData,
                     [name]: formattedValue,
                 });
-                setFormErrors({
+                /* setFormErrors({
                     ...formErrors,
                     cardExpiration: '', // Clear the error if the input is valid
-                });
+                }); */
             } else if (formattedValue.length > 5) {
                 setFormErrors({
                     ...formErrors,
                     cardExpiration: '',
                 });
+            } else if (enteredMonthValue < 0 || enteredMonthValue > 12) {
+                setFormErrors({
+                    ...formErrors,
+                    cardExpiration: 'Enter a valid month (1-12)',
+                });
             } else {
+                console.log("last else");
                 setFormData({
                     ...formData,
                     [name]: formattedValue,
@@ -199,7 +208,6 @@ const PaymentUi = () => {
         }
     };
 
-
     const validateForm = () => {
         const errors = {};
 
@@ -220,9 +228,9 @@ const PaymentUi = () => {
         // Validate card expiration (MM/YY format)
         if (!formData.cardExpiration) {
             errors.cardExpiration = 'Expiration date is required';
-        } /* else if (!isValidCardExpiration(formData.cardExpiration)) {
+        } else if (!isValidCardExpiration(formData.cardExpiration)) {
             errors.cardExpiration = 'Invalid expiration date (MM/YY)';
-        } */
+        }
 
         // Validate CVC
         if (!formData.cardCVC) {
@@ -263,7 +271,6 @@ const PaymentUi = () => {
         return emailPattern.test(email);
     };
 
-
     const isValidCardNumber = (cardNumber) => {
         // Remove any non-numeric characters from the input
         const numericValue = cardNumber.replace(/\D/g, '');
@@ -271,7 +278,6 @@ const PaymentUi = () => {
         // Validate if the numeric value contains exactly 16 numerical digits
         return numericValue.length === 16;
     };
-
 
     const isValidCardExpiration = (expiration) => {
         // Validate if expiration is in MM/YY format and within a valid date range
@@ -284,7 +290,6 @@ const PaymentUi = () => {
         // Validate if CVC contains 3 or 4 numerical digits
         return /^\d{3,4}$/.test(cvc);
     };
-
 
     const handleSubscribe = (e) => {
         e.preventDefault();
@@ -320,15 +325,16 @@ const PaymentUi = () => {
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
     };
-
+   
     return (
         <>
-            <div className='flex flex-col lg:flex-row items-center justify-center w-full min-h-screen'>
+            <div className='flex flex-col lg:flex-row items-center lg:justify-center w-full min-h-screen relative'>
+            {/* flex flex-col lg:flex-row items-center justify-center w-full min-h-screen custom:max-h-screen custom:min-h-screen relative */}
                 <div className='bg-black w-full lg:w-1/2 lg:min-h-screen flex flex-col items-center lg:items-end  gap-10 text-white relative 2xl:pt-16 '>
-                    <header className={`flex fixed  items-center justify-between w-full pt-3 px-5 z-50 lg:hidden ${(isModal && scrollY < 250) ? "bg-white " : "bg-black "}  `}>
+                    <header className={`flex fixed  items-center justify-between w-full pt-3 px-5 z-50 lg:hidden ${isModal ? "bg-white " : "bg-black "}  `}>
                         <div className='flex items-center gap-3  justify-center '>
                             <AiOutlineArrowLeft className='w-10 text-gray-400 ' />
-                            {(isModal && scrollY < 250) ? <Image src="/images/olevl.png"
+                            {isModal ? <Image src="/images/olevl.png"
                                 width="100"
                                 height="80"
                                 alt='olevl'
@@ -341,7 +347,10 @@ const PaymentUi = () => {
                                     className='w-[50px]  xs:w-[100px]  '
                                 />}
                         </div>
-                        <button className='flex items-center justify-center gap-1 py-3 rounded-md text-gray-400  ' onClick={() => setIsModal(!isModal)}>
+                        <button className='flex items-center justify-center gap-1 py-3 rounded-md text-gray-400  ' onClick={(e) => {
+                            e.stopPropagation();
+                            setIsModal(!isModal);
+                        }}>
                             <span className='border-b border-dashed inline-block leading-5 border-gray-400  ' >
                                 {scrollY > 250 ? "$125.00" : isModal ? "Close" : "Details"}
                             </span>
@@ -350,9 +359,11 @@ const PaymentUi = () => {
 
                         </button>
                     </header>
-                    {
-                        (isModal && scrollY < 250) &&
-                        <div className={` ${(isModal && scrollY < 250) ? "slide-in" : "slide-out  -translate-y-[156%] "} absolute top-14 flex  justify-center gap-0 w-full flex-col bg-white px-7 `}>
+                    {isModal &&
+                        <div
+                            className={` ${(isModal) ? "slide-in" : "slide-out  -translate-y-[156%] "} fixed top-14 z-10 flex  justify-center gap-0 w-full flex-col bg-white px-7 shadow-[0px_25px_20px_-20px_rgba(0,0,0,0.45)] `}
+                            ref={dropdownRef}
+                        >
                             <div className='flex items-center justify-between gap-10 py-5 border-b border-gray-600'>
                                 <div className='flex flex-col items-start'>
                                     <span className='text-base font-semibold text-black '>Complete Shooter Club Payments</span>
@@ -397,7 +408,7 @@ const PaymentUi = () => {
                             <span className='text-gray-400 text-center text-xl font-semibold lg:leading-4 '>Subscribe to Complete Shooter Club Payment</span>
                             <div className='flex items-center gap-2 '>
                                 <span className='text-5xl font-semibold  '>$0.00</span>
-                                <div className='flex flex-row lg:flex-col items-start  pt-5 lg:pt-0 '>
+                                <div className='flex flex-row lg:flex-col items-start gap-1 pt-5 lg:pt-0 '>
                                     <span className='text-gray-400 text-lg font-medium  '>due</span>
                                     <span className='text-gray-400 text-lg font-medium '>today</span>
                                 </div>
@@ -438,7 +449,12 @@ const PaymentUi = () => {
                             </div>
                         </div>
 
-                        <button className='flex items-center justify-center gap-1 bg-gray-900 px-4 py-3 rounded-md lg:hidden ' onClick={() => setIsModal(!isModal)}>
+                        <button
+                            className='flex items-center justify-center gap-1 bg-gray-900 px-4 py-3 rounded-md lg:hidden ' onClick={(e) => {
+                                e.stopPropagation();
+                                setIsModal(!isModal);
+                            }}
+                        >
                             <span > View details</span>
                             {/* {isDetails ? <AiOutlineUp /> : <AiOutlineDown />
                             } */}
@@ -455,7 +471,7 @@ const PaymentUi = () => {
                         </div>
                         <div className='flex  items-center w-full lg:hidden'>
                             <div className='w-full h-[2px] border-b border-gray-400 '></div>
-                            <span className=' lg:text-2xl lg:font-semibold text-base text-gray-400 leading-5 w-[310px] mx-2 whitespace-nowrap '>Or Pay with card</span>
+                            <span className=' lg:text-2xl lg:font-semibold text-base text-gray-400 leading-5 w-[310px] mx-2 whitespace-nowrap '>Or pay with card</span>
                             <div className='w-full h-[2px] border-b border-gray-400 '></div>
                         </div>
                         <span className=' lg:text-2xl lg:font-semibold text-base lg:block hidden text-gray-400 leading-5 w-[310px]  whitespace-nowrap '>Pay with card</span>
@@ -464,7 +480,7 @@ const PaymentUi = () => {
                                 <div className='flex items-center gap-8 p-2 border border-gray-400 rounded-lg bg-gray-200 w-full cursor-pointer '>
                                     <label htmlFor="AddEmail" className='text-base font-medium text-gray-400 '>Email</label>
                                     <input
-                                        className='w-full max-w-[300px] bg-none border-none bg-transparent'
+                                        className='w-full max-w-[300px] bg-none border-none bg-transparent text-base sm:text-lg lg:text-xl'
                                         disabled
                                         type="email"
                                         name="email"
@@ -475,22 +491,25 @@ const PaymentUi = () => {
                                     />
                                 </div>
 
-                                <div className='flex items-start flex-col w-full'>
+                                <div className='flex items-start flex-col w-full relative'>
                                     <div className='flex items-center justify-between w-full'>
                                         <label htmlFor="AddCard" className=' text-gray-400 text-base font-medium leading-8 cursor-pointer '>Card information</label>
 
+                                        <div className={`error-message text-sm text-red-500 font-medium ${(formErrors.cardCVC || formErrors.cardExpiration || formErrors.cardNumber) ? 'opacity-100 transition-opacity duration-300 delay-300' : 'opacity-0'}`}>
+                                            Required
+                                        </div>
 
-                                        {(formErrors.cardCVC || formErrors.cardExpiration || formErrors.cardNumber) && <div className="error-message text-sm text-red-500 font-medium ">Required</div>}
+                                        {/* {(formErrors.cardCVC || formErrors.cardExpiration || formErrors.cardNumber) && <div className="error-message text-sm text-red-500 font-medium ">Required</div>} */}
                                     </div>
 
 
-                                    <div className={`flex items-start flex-col  ${(formErrors.cardCVC || formErrors.cardExpiration || formErrors.cardNumber) ? "border border-red-300" : "border border-gray-400"} rounded-lg w-full `}>
-                                        <div className={`w-full flex items-center  ${(formErrors.cardCVC || formErrors.cardExpiration || formErrors.cardNumber) ? "border-b border-red-300" : "border-b border-gray-400"}`} >
+                                    <div className={`flex items-start flex-col  ${(formErrors.cardCVC || formErrors.cardExpiration || formErrors.cardNumber) ? "border border-red-300" : "border border-gray-400"} rounded-lg w-full transition duration-300 ease-in-out `}>
+                                        <div className={`w-full flex items-center justify-between  ${(formErrors.cardCVC || formErrors.cardExpiration || formErrors.cardNumber) ? "border-b border-red-300" : "border-b border-gray-400"}`} >
                                             <input
                                                 type="text"
                                                 name="cardNumber"
                                                 id="AddCard"
-                                                className='w-[80%] bg-transparent py-1 pl-2 outline-none '
+                                                className='w-[48%] xs:w-[80%] bg-transparent py-1 pl-2 outline-none '
                                                 placeholder='1234 1234 1234 1234'
                                                 value={formData.cardNumber}
                                                 onChange={(e) => handleInputChange(e)}
@@ -512,7 +531,7 @@ const PaymentUi = () => {
                                                     height="15"
                                                     alt='olevl'
                                                 />
-                                                <div className='max-w-[25px] max-h-[40px] pb-2 '>
+                                                <div className='max-w-[20px] max-h-[40px] pb-2 '>
                                                     <Slider {...settings}>
                                                         <Image src="/images/visa.png"
                                                             width="20"
@@ -547,35 +566,37 @@ const PaymentUi = () => {
                                                 value={formData.cardExpiration}
                                                 onChange={(e) => handleInputChange(e)}
                                             />
-                                            <div className='flex items-center justify-between px-5 w-1/2'>
+                                            <div className='flex items-center justify-between pr-2  w-1/2'>
                                                 <input
                                                     type="text"
                                                     name="cardCVC"
                                                     id="cardCVC"
                                                     placeholder="CVC"
-                                                    className=' border-none  bg-transparent py-1 w-1/2  outline-none '
+                                                    className=' border-none  bg-transparent py-1 w-full  outline-none px-5 '
                                                     value={formData.cardCVC}
                                                     onChange={(e) => handleInputChange(e)}
                                                 />
-                                                <BsCreditCardFill />
+                                                <BsCreditCardFill className=' w-fit ' />
                                             </div>
                                         </div>
                                     </div>
-                                    {formErrors.cardExpiration && <div className="error-message text-sm text-red-500 font-medium ">{formErrors.cardExpiration}</div>}
-
+                                    <div className={`error-message absolute top-[108px] text-sm text-red-500 font-medium ${formErrors.cardExpiration ? 'opacity-100 transition-opacity duration-300 delay-300' : 'opacity-0'} `} >{formErrors.cardExpiration}</div>
                                 </div>
 
 
                                 <div className='flex flex-col items-start w-full '>
                                     <div className='flex items-center justify-between w-full'>
                                         <label htmlFor="Addcardname" className=' text-gray-400 text-base font-medium leading-8 cursor-pointer '>Name on card</label>
-                                        {formErrors.cardName && <div className="error-message text-sm text-red-500 font-medium ">Required</div>}
+
+                                        <div className={`error-message text-sm text-red-500 font-medium ${formErrors.cardName ? 'opacity-100 transition-opacity duration-300 delay-300' : 'opacity-0'}`}>
+                                            Required
+                                        </div>
                                     </div>
                                     <input
                                         type="text"
                                         name="cardName"
                                         id="Addcardname"
-                                        className={`w-full ${formErrors.cardName ? "border border-red-300" : "border border-gray-400"} bg-transparent py-1 pl-2  rounded-lg outline-none `}
+                                        className={`w-full ${formErrors.cardName ? "border border-red-300" : "border border-gray-400"} bg-transparent py-1 pl-2  rounded-lg outline-none transition duration-300 ease-in-out `}
                                         value={formData.cardName}
                                         onChange={(e) => handleInputChange(e)}
                                     />
@@ -586,10 +607,13 @@ const PaymentUi = () => {
                                 <div className="relative inline-block text-left w-full " ref={dropdownRef} >
                                     <div className='flex items-center justify-between w-full'>
                                         <span className=' text-gray-400 text-base font-medium leading-8 '>Billing address</span>
-                                        {(formErrors.billingAddress || formErrors.selectedCountry) && <div className="error-message text-sm text-red-500 font-medium ">Required</div>}
+
+                                        <div className={`error-message text-sm text-red-500 font-medium ${(formErrors.billingAddress || formErrors.selectedCountry) ? 'opacity-100 transition-opacity duration-300 delay-300' : 'opacity-0'}`}>
+                                            Required
+                                        </div>
                                     </div>
 
-                                    <div className={`flex items-center bg-transparent ${(formErrors.billingAddress || formErrors.selectedCountry) ? "border border-red-300" : "border border-gray-300"} rounded-t-lg shadow-sm px-4 w-full`} >
+                                    <div className={`flex items-center bg-transparent ${(formErrors.billingAddress || formErrors.selectedCountry) ? "border border-red-300" : "border border-gray-300"} rounded-t-lg shadow-sm px-4 w-full transition duration-300 ease-in-out`} >
                                         <input
                                             type="text"
                                             name='selectedCountry'
@@ -628,6 +652,9 @@ const PaymentUi = () => {
                                                         {country}
                                                     </li>
                                                 ))}
+                                                {filteredCountries.length === 0 && !filteredCountries.includes(formData.selectedCountry) && (
+                                                    <li className="text-red-300 px-4 py-1 hover:bg-indigo-100 cursor-pointer text-base font-medium"> Selected country is not available.</li>
+                                                )}
                                             </ul>
                                         </div>
                                     )}
@@ -636,7 +663,7 @@ const PaymentUi = () => {
                                         name="billingAddress"
                                         id="address"
                                         placeholder='Address'
-                                        className={`  py-2 text-sm font-medium text-gray-700 bg-transparent  w-full border-b border-l border-r ${(formErrors.billingAddress || formErrors.selectedCountry) ? "border-red-300" : " border-gray-300"}  shadow-sm px-4 rounded-b-lg outline-none `}
+                                        className={`  py-2 text-sm font-medium text-gray-700 bg-transparent  w-full border-b border-l border-r ${(formErrors.billingAddress || formErrors.selectedCountry) ? "border-red-300" : " border-gray-300"}  shadow-sm px-4 rounded-b-lg outline-none transition duration-300 ease-in-out`}
                                         value={formData.billingAddress}
                                         onChange={(e) => handleInputChange(e)}
                                     />
@@ -644,23 +671,27 @@ const PaymentUi = () => {
                                     <div className=' text-gray-400 text-base font-semibold border-b border-dashed inline-block leading-5 border-gray-400 '>Enter address manually</div>
                                 </div>
 
-                                <div className='border border-gray-300 rounded-lg shadow-sm px-4 w-full flex items-start gap-5 py-2 mt-3 '>
-                                    <input
-                                        type="checkbox"
-                                        name="saveInfo"
-                                        id="saveInfo"
-                                        className='w-4 h-4 shadow-2xl mt-2 '
-                                        value={formData.saveInfo}
-                                        onChange={(e) => handleInputChange(e)}
-                                    />
-                                    <div className='flex items-start justify-center flex-col' >
-                                        <span className='text-lg font-semibold '>Save my info for 1-click checkout with Link</span>
-                                        <span className='text-base font-medium text-gray-400'>Securely pay on Level and everywhere Link is accepted. </span>
+                                <div className='relative w-full'>
+                                    <div className='border border-gray-300 rounded-lg shadow-sm px-4 w-full flex items-start gap-5 py-2 mt-3  '>
+                                        <input
+                                            type="checkbox"
+                                            name="saveInfo"
+                                            id="saveInfo"
+                                            className='w-4 h-4 shadow-2xl mt-2 cursor-pointer '
+                                            value={formData.saveInfo}
+                                            onChange={(e) => handleInputChange(e)}
+                                        />
+                                        <div className='flex items-start justify-center flex-col' >
+                                            <label htmlFor="saveInfo" className='text-lg font-semibold cursor-pointer '>Save my info for 1-click checkout with Link</label>
+                                            <label htmlFor="saveInfo" className='text-base font-medium text-gray-400 cursor-pointer '>Securely pay on Levl and everywhere Link is accepted. </label>
+                                        </div>
+                                    </div>
+                                    <div
+                                        className={`error-message absolute -bottom-5  text-sm text-red-500 font-medium ${formErrors.saveInfo ? 'opacity-100 transition-opacity duration-300 delay-300' : 'opacity-0'} `}
+                                    >
+                                        {formErrors.saveInfo}
                                     </div>
                                 </div>
-
-                                {formErrors.saveInfo && <div className="error-message text-sm text-red-500 font-medium ">{formErrors.saveInfo}</div>}
-
                                 <button
                                     type="submit"
                                     className={`w-full bg-black py-3 rounded-lg mt-5 text-gray-500 text-xl font-semibold relative ${isLoading ? 'opacity-100  h-[52px] cursor-not-allowed bg-black' : ''
@@ -675,7 +706,7 @@ const PaymentUi = () => {
                                 </button>
 
                                 <div className='text-center'>
-                                    <p className='text-center text-base font-semibold text-gray-400 '>By confirming your subscription, you allow levl to charge your card for this payment and future payment in acordance with their terms. you can always cancel your subscription.</p>
+                                    <p className='text-center text-base font-semibold text-gray-400 '>By confirming your subscription, you allow levl to charge your card for this payment and future payment in accordance with their terms. You can always cancel your subscription.</p>
                                 </div>
                             </div>
                         </form>
